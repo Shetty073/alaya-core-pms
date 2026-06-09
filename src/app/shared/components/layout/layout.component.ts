@@ -2,11 +2,13 @@ import { Component, inject, signal } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { CommonModule } from '@angular/common';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 interface NavItem {
   label: string;
   route: string;
   icon: string;
+  safeIcon?: SafeHtml;
   roles: string[];
 }
 
@@ -30,7 +32,7 @@ interface NavItem {
           <ul>
             <li *ngFor="let item of filteredNavItems()">
               <a [routerLink]="item.route" routerLinkActive="active" [routerLinkActiveOptions]="{exact: item.route === '/admin'}" class="nav-link" (click)="onNavClick()">
-                <span class="nav-icon" [innerHTML]="item.icon"></span>
+                <span class="nav-icon" [innerHTML]="item.safeIcon"></span>
                 <span class="nav-label">{{ item.label }}</span>
               </a>
             </li>
@@ -417,8 +419,8 @@ export class LayoutComponent {
   private housekeepingIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`;
   private financeIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>`;
 
-  private navItems: NavItem[] = [
-    { label: 'Dashboard', route: '/admin', icon: this.dashboardIcon, roles: ['admin', 'receptionist'] },
+  navItems: NavItem[] = [
+    { label: 'Dashboard', route: '/admin/dashboard', icon: this.dashboardIcon, roles: ['admin', 'receptionist'] },
     { label: 'Properties', route: '/admin/properties', icon: this.propertiesIcon, roles: ['admin'] },
     { label: 'Entities', route: '/admin/entities', icon: this.entitiesIcon, roles: ['admin', 'receptionist'] },
     { label: 'KOT Restaurant', route: '/admin/kot', icon: this.kotIcon, roles: ['admin', 'chef'] },
@@ -429,6 +431,13 @@ export class LayoutComponent {
   ];
 
   constructor() {
+    const sanitizer = inject(DomSanitizer);
+    
+    // Sanitize icons so Angular doesn't strip <svg> tags inside [innerHTML]
+    this.navItems.forEach(item => {
+      item.safeIcon = sanitizer.bypassSecurityTrustHtml(item.icon);
+    });
+
     // Check system preference for dark mode
     if (typeof window !== 'undefined') {
       const isSavedDark = localStorage.getItem('alaya_pms_theme') === 'dark';
