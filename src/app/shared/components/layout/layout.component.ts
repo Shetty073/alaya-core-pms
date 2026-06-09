@@ -16,6 +16,10 @@ interface NavItem {
   imports: [CommonModule, RouterModule],
   template: `
     <div class="app-container" [class.sidebar-collapsed]="isCollapsed()">
+      
+      <!-- Backdrop for Mobile Drawer -->
+      <div class="sidebar-overlay" (click)="closeSidebarMobile()"></div>
+      
       <!-- Sidebar Drawer -->
       <aside class="sidebar">
         <div class="sidebar-header">
@@ -25,7 +29,7 @@ interface NavItem {
         <nav class="sidebar-nav">
           <ul>
             <li *ngFor="let item of filteredNavItems()">
-              <a [routerLink]="item.route" routerLinkActive="active" [routerLinkActiveOptions]="{exact: item.route === '/admin'}" class="nav-link">
+              <a [routerLink]="item.route" routerLinkActive="active" [routerLinkActiveOptions]="{exact: item.route === '/admin'}" class="nav-link" (click)="onNavClick()">
                 <span class="nav-icon" [innerHTML]="item.icon"></span>
                 <span class="nav-label">{{ item.label }}</span>
               </a>
@@ -65,12 +69,12 @@ interface NavItem {
             <!-- Storefront Quick Link -->
             <a routerLink="/storefront" class="btn btn-sm" style="font-weight: 500;">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-              Guest Storefront
+              <span class="btn-text">Guest Storefront</span>
             </a>
             
             <button class="btn btn-danger btn-sm" (click)="logout()">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-              Logout
+              <span class="btn-text">Logout</span>
             </button>
           </div>
         </header>
@@ -98,7 +102,7 @@ interface NavItem {
       display: flex;
       flex-direction: column;
       height: 100%;
-      z-index: 100;
+      z-index: 200;
       transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
@@ -227,6 +231,7 @@ interface NavItem {
       flex-direction: column;
       height: 100%;
       overflow: hidden;
+      width: 100%;
     }
     
     .topbar {
@@ -243,7 +248,7 @@ interface NavItem {
     .topbar-left {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 12px;
     }
     
     .topbar-right {
@@ -275,6 +280,9 @@ interface NavItem {
     .page-title {
       font-size: 18px;
       font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     
     .page-viewport {
@@ -316,6 +324,79 @@ interface NavItem {
     .sidebar-collapsed .user-profile {
       justify-content: center;
     }
+
+    .sidebar-overlay {
+      display: none;
+    }
+
+    /* RESPONSIVE MOBILE ADJUSTMENTS */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: var(--sidebar-width) !important;
+        transform: translateX(-100%);
+        transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 300;
+      }
+
+      /* When NOT collapsed, show the sidebar */
+      .app-container:not(.sidebar-collapsed) .sidebar {
+        transform: translateX(0);
+      }
+
+      /* Sidebar overlay visible when side drawer is open */
+      .app-container:not(.sidebar-collapsed) .sidebar-overlay {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.4);
+        z-index: 250;
+        animation: fadeIn 0.15s ease-out;
+      }
+
+      .main-wrapper {
+        width: 100vw;
+      }
+
+      .topbar {
+        padding: 0 12px;
+      }
+
+      .topbar-right {
+        gap: 6px;
+      }
+
+      /* Hide button labels on small viewports */
+      .btn-text {
+        display: none;
+      }
+
+      .topbar-right .btn {
+        padding: 6px 8px;
+      }
+
+      .page-viewport {
+        padding: 12px;
+      }
+
+      .page-title {
+        font-size: 16px;
+      }
+
+      /* Force sidebar layout inside overlay slider to render completely rather than squished */
+      .sidebar-header::after {
+        display: none !important;
+      }
+      .logo-text, .nav-label, .user-info {
+        display: flex !important;
+      }
+    }
   `]
 })
 export class LayoutComponent {
@@ -353,6 +434,11 @@ export class LayoutComponent {
       const isSavedDark = localStorage.getItem('alaya_pms_theme') === 'dark';
       this.isDark.set(isSavedDark);
       this.applyTheme(isSavedDark);
+
+      // Auto-collapse sidebar to drawer mode on start on mobile screens
+      if (window.innerWidth < 768) {
+        this.isCollapsed.set(true);
+      }
     }
   }
 
@@ -370,6 +456,16 @@ export class LayoutComponent {
 
   toggleSidebar() {
     this.isCollapsed.update(val => !val);
+  }
+
+  closeSidebarMobile() {
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      this.isCollapsed.set(true);
+    }
+  }
+
+  onNavClick() {
+    this.closeSidebarMobile();
   }
 
   toggleTheme() {
