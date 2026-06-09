@@ -430,7 +430,7 @@ export class LayoutComponent {
     { label: 'KOT Restaurant', route: '/admin/kot', icon: this.kotIcon, roles: ['admin', 'chef', 'captain', 'biller'] },
     { label: 'Restaurant Billing', route: '/admin/restaurant-billing', icon: this.billingIcon, roles: ['admin', 'biller'] },
     { label: 'Inventory', route: '/admin/inventory', icon: this.inventoryIcon, roles: ['admin', 'chef'] },
-    { label: 'Staff Directory', route: '/admin/staff', icon: this.staffIcon, roles: ['admin'] },
+    { label: 'User Management', route: '/admin/user-management', icon: this.staffIcon, roles: ['admin'] },
     { label: 'Housekeeping', route: '/admin/housekeeping', icon: this.housekeepingIcon, roles: ['admin', 'housekeeper'] },
     { label: 'Finance & Invoices', route: '/admin/finance', icon: this.financeIcon, roles: ['admin'] }
   ];

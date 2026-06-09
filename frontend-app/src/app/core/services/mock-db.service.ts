@@ -55,8 +55,40 @@ export interface Staff {
   id: string;
   name: string;
   email: string;
-  role: 'admin' | 'receptionist' | 'chef' | 'housekeeper' | 'driver' | 'guest' | 'captain' | 'biller';
+  role: string;
   accessModules: string[];
+  phone?: string;
+  employeeCode?: string;
+  joinDate?: string;
+  status?: 'active' | 'suspended';
+  idProofs?: string[];
+}
+
+export interface ModuleMaster {
+  id: string;
+  name: string;
+}
+
+export interface PermissionMaster {
+  id: string;
+  name: string;
+}
+
+export interface RoleMaster {
+  id: string;
+  name: string;
+  permissions: Record<string, string[]>;
+}
+
+export interface TransactionalLog {
+  id: string;
+  userId: string;
+  userEmail: string;
+  userName: string;
+  action: string;
+  module: string;
+  timestamp: number;
+  details?: string;
 }
 
 export interface HousekeepingTask {
@@ -113,6 +145,10 @@ export class MockDbService {
   private housekeepingTasks = signal<HousekeepingTask[]>([]);
   private invoices = signal<Invoice[]>([]);
   private financialRecords = signal<FinancialRecord[]>([]);
+  private modulesMaster = signal<ModuleMaster[]>([]);
+  private permissionsMaster = signal<PermissionMaster[]>([]);
+  private rolesMaster = signal<RoleMaster[]>([]);
+  private transactionalLogs = signal<TransactionalLog[]>([]);
 
   constructor() {
     this.loadInitialData();
@@ -209,13 +245,13 @@ export class MockDbService {
     ];
 
     const initialStaff: Staff[] = [
-      { id: 'st-1', name: 'Administrator Alaya', email: 'admin@alaya.com', role: 'admin', accessModules: ['dashboard', 'properties', 'entities', 'kot', 'inventory', 'staff', 'housekeeping', 'finance'] },
-      { id: 'st-2', name: 'Chef Mario', email: 'chef@alaya.com', role: 'chef', accessModules: ['dashboard', 'kot', 'inventory'] },
-      { id: 'st-3', name: 'Sarah Clean', email: 'housekeeper@alaya.com', role: 'housekeeper', accessModules: ['housekeeping'] },
-      { id: 'st-4', name: 'John Guest', email: 'guest@alaya.com', role: 'guest', accessModules: [] },
-      { id: 'st-5', name: 'Front Desk Fiona', email: 'receptionist@alaya.com', role: 'receptionist', accessModules: ['dashboard', 'entities', 'housekeeping', 'check-in-out'] },
-      { id: 'st-6', name: 'Captain Jack', email: 'captain@alaya.com', role: 'captain', accessModules: ['kot'] },
-      { id: 'st-7', name: 'Biller Bill', email: 'biller@alaya.com', role: 'biller', accessModules: ['restaurant-billing', 'kot'] }
+      { id: 'st-1', name: 'Administrator Alaya', email: 'admin@alaya.com', role: 'admin', accessModules: ['dashboard', 'properties', 'entities', 'kot', 'inventory', 'staff', 'housekeeping', 'finance'], employeeCode: 'EMP-001', phone: '9876543210', joinDate: '2025-01-15', status: 'active', idProofs: ['id_card.png'] },
+      { id: 'st-2', name: 'Chef Mario', email: 'chef@alaya.com', role: 'chef', accessModules: ['dashboard', 'kot', 'inventory'], employeeCode: 'EMP-002', phone: '9876543211', joinDate: '2025-02-10', status: 'active', idProofs: ['health_cert.pdf'] },
+      { id: 'st-3', name: 'Sarah Clean', email: 'housekeeper@alaya.com', role: 'housekeeper', accessModules: ['housekeeping'], employeeCode: 'EMP-003', phone: '9876543212', joinDate: '2025-03-20', status: 'active', idProofs: ['aadhaar_scan.jpg'] },
+      { id: 'st-4', name: 'John Guest', email: 'guest@alaya.com', role: 'guest', accessModules: [], employeeCode: 'EMP-004', phone: '9876543213', joinDate: '2026-05-01', status: 'active', idProofs: [] },
+      { id: 'st-5', name: 'Front Desk Fiona', email: 'receptionist@alaya.com', role: 'receptionist', accessModules: ['dashboard', 'entities', 'housekeeping', 'check-in-out'], employeeCode: 'EMP-005', phone: '9876543214', joinDate: '2025-06-01', status: 'active', idProofs: ['dl_scan.jpg'] },
+      { id: 'st-6', name: 'Captain Jack', email: 'captain@alaya.com', role: 'captain', accessModules: ['kot'], employeeCode: 'EMP-006', phone: '9876543215', joinDate: '2025-08-12', status: 'active', idProofs: ['passport_scan.pdf'] },
+      { id: 'st-7', name: 'Biller Bill', email: 'biller@alaya.com', role: 'biller', accessModules: ['restaurant-billing', 'kot'], employeeCode: 'EMP-007', phone: '9876543216', joinDate: '2025-10-05', status: 'active', idProofs: ['voter_id.jpg'] }
     ];
 
     const initialHousekeeping: HousekeepingTask[] = [
@@ -262,6 +298,92 @@ export class MockDbService {
       { id: 'fin-4', type: 'revenue', category: 'KOT Restaurant', amount: 145, date: Date.now() - 12 * 60 * 60 * 1000, description: 'Table 5 Food Bill' }
     ];
 
+    const initialModules: ModuleMaster[] = [
+      { id: 'dashboard', name: 'Dashboard' },
+      { id: 'properties', name: 'Properties' },
+      { id: 'entities', name: 'Entities' },
+      { id: 'kot', name: 'KOT Restaurant' },
+      { id: 'billing', name: 'Restaurant Billing' },
+      { id: 'inventory', name: 'Inventory' },
+      { id: 'staff', name: 'User Management' },
+      { id: 'housekeeping', name: 'Housekeeping' },
+      { id: 'finance', name: 'Finance & Invoices' }
+    ];
+
+    const initialPermissions: PermissionMaster[] = [
+      { id: 'read', name: 'Read' },
+      { id: 'write', name: 'Write' },
+      { id: 'delete', name: 'Delete' },
+      { id: 'settle', name: 'Settle Payments' },
+      { id: 'assign', name: 'Assign Tasks' }
+    ];
+
+    const initialRoles: RoleMaster[] = [
+      {
+        id: 'admin',
+        name: 'Admin',
+        permissions: {
+          'dashboard': ['read', 'write', 'delete', 'settle', 'assign'],
+          'properties': ['read', 'write', 'delete'],
+          'entities': ['read', 'write', 'delete'],
+          'kot': ['read', 'write', 'delete'],
+          'billing': ['read', 'write', 'delete', 'settle'],
+          'inventory': ['read', 'write', 'delete'],
+          'staff': ['read', 'write', 'delete'],
+          'housekeeping': ['read', 'write', 'assign'],
+          'finance': ['read', 'write', 'delete']
+        }
+      },
+      {
+        id: 'receptionist',
+        name: 'Receptionist',
+        permissions: {
+          'dashboard': ['read'],
+          'entities': ['read', 'write'],
+          'housekeeping': ['read', 'write', 'assign'],
+          'staff': ['read']
+        }
+      },
+      {
+        id: 'captain',
+        name: 'Captain',
+        permissions: {
+          'kot': ['read', 'write']
+        }
+      },
+      {
+        id: 'biller',
+        name: 'Biller',
+        permissions: {
+          'kot': ['read', 'write'],
+          'billing': ['read', 'write', 'settle']
+        }
+      },
+      {
+        id: 'chef',
+        name: 'Chef',
+        permissions: {
+          'dashboard': ['read'],
+          'kot': ['read', 'write'],
+          'inventory': ['read', 'write']
+        }
+      },
+      {
+        id: 'housekeeper',
+        name: 'Housekeeper',
+        permissions: {
+          'housekeeping': ['read', 'write']
+        }
+      }
+    ];
+
+    const initialLogs: TransactionalLog[] = [
+      { id: 'log-1', userId: 'st-5', userEmail: 'receptionist@alaya.com', userName: 'Front Desk Fiona', action: 'Guest Check-In', module: 'Entities', timestamp: Date.now() - 3600000, details: 'Checked in Richard Miller for Room 102' },
+      { id: 'log-2', userId: 'st-6', userEmail: 'captain@alaya.com', userName: 'Captain Jack', action: 'KOT Created', module: 'KOT Restaurant', timestamp: Date.now() - 1800000, details: 'Placed order for Table 2' },
+      { id: 'log-3', userId: 'st-7', userEmail: 'biller@alaya.com', userName: 'Biller Bill', action: 'Direct Settle', module: 'Restaurant Billing', timestamp: Date.now() - 900000, details: 'Settled bill for order kot-1001' },
+      { id: 'log-4', userId: 'st-1', userEmail: 'admin@alaya.com', userName: 'Administrator Alaya', action: 'Role Update', module: 'User Management', timestamp: Date.now() - 300000, details: 'Modified permissions for role receptionist' }
+    ];
+
     this.properties.set(getLocal('properties', initialProperties));
     this.entities.set(getLocal('entities', initialEntities));
     this.kotOrders.set(getLocal('kotOrders', initialKOTOrders));
@@ -270,6 +392,10 @@ export class MockDbService {
     this.housekeepingTasks.set(getLocal('housekeeping', initialHousekeeping));
     this.invoices.set(getLocal('invoices', initialInvoices));
     this.financialRecords.set(getLocal('finance', initialFinance));
+    this.modulesMaster.set(getLocal('modules', initialModules));
+    this.permissionsMaster.set(getLocal('permissions', initialPermissions));
+    this.rolesMaster.set(getLocal('roles', initialRoles));
+    this.transactionalLogs.set(getLocal('logs', initialLogs));
 
     this.syncAll();
   }
@@ -287,6 +413,10 @@ export class MockDbService {
     this.sync('housekeeping', this.housekeepingTasks());
     this.sync('invoices', this.invoices());
     this.sync('finance', this.financialRecords());
+    this.sync('modules', this.modulesMaster());
+    this.sync('permissions', this.permissionsMaster());
+    this.sync('roles', this.rolesMaster());
+    this.sync('logs', this.transactionalLogs());
   }
 
   // API-Ready Observable Accessors
@@ -419,7 +549,25 @@ export class MockDbService {
     const newStaff: Staff = { ...staff, id: `st-${Date.now()}` };
     this.staffList.update(list => [...list, newStaff]);
     this.sync('staff', this.staffList());
+    this.logAction('st-1', 'Create User', 'User Management', `Created user account for ${staff.name} (${staff.email})`);
     return of(newStaff).pipe(delay(150));
+  }
+
+  updateStaff(staff: Staff): Observable<Staff> {
+    this.staffList.update(list => list.map(item => item.id === staff.id ? staff : item));
+    this.sync('staff', this.staffList());
+    this.logAction('st-1', 'Update User', 'User Management', `Updated user account details for ${staff.name}`);
+    return of(staff).pipe(delay(100));
+  }
+
+  deleteStaff(id: string): Observable<boolean> {
+    const user = this.staffList().find(s => s.id === id);
+    if (!user) return throwError(() => new Error('User not found'));
+    
+    this.staffList.update(list => list.filter(item => item.id !== id));
+    this.sync('staff', this.staffList());
+    this.logAction('st-1', 'Delete User', 'User Management', `Deleted user account for ${user.name}`);
+    return of(true).pipe(delay(100));
   }
 
   // --- Housekeeping ---
@@ -611,6 +759,7 @@ export class MockDbService {
       }).subscribe();
     }
     
+    this.logAction('st-5', 'Guest Check-In', 'Entities', `Checked in guest ${data.name} into Room ${room.name}`);
     this.syncAll();
     return of(newInvoice).pipe(delay(150));
   }
@@ -654,6 +803,7 @@ export class MockDbService {
 
     if (updated) {
       this.kotOrders.update(list => list.map(o => o.id === orderId ? { ...o, billingStatus: 'charged_to_room' as const } : o));
+      this.logAction('st-7', 'Charge KOT to Room', 'Restaurant Billing', `Charged restaurant order #${orderId} to Room Invoice`);
       this.syncAll();
       return of(true).pipe(delay(100));
     } else {
@@ -712,6 +862,7 @@ export class MockDbService {
       }).subscribe();
     }
 
+    this.logAction('st-5', 'Guest Check-Out', 'Entities', `Settled checkout for guest ${invoice.guestName} (${invoice.entityName})`);
     this.syncAll();
     return of(updated as unknown as Invoice).pipe(delay(150));
   }
@@ -769,7 +920,119 @@ export class MockDbService {
       description: `Direct Settle KOT #${orderId} at ${order.entityName}`
     }).subscribe();
     
+    this.logAction('st-7', 'Direct Settle KOT', 'Restaurant Billing', `Settled direct cash/card payment for KOT order #${orderId}`);
     this.syncAll();
     return of(true).pipe(delay(100));
+  }
+
+  // --- Roles & Modules Master Configurations ---
+
+  getRoles(): Observable<RoleMaster[]> {
+    return of(this.rolesMaster()).pipe(delay(100));
+  }
+
+  addRole(role: Omit<RoleMaster, 'id'>): Observable<RoleMaster> {
+    const newRole: RoleMaster = { ...role, id: `role-${Date.now()}` };
+    this.rolesMaster.update(list => [...list, newRole]);
+    this.sync('roles', this.rolesMaster());
+    this.logAction('st-1', 'Created Role', 'User Management', `Created new user role configuration: ${role.name}`);
+    return of(newRole).pipe(delay(100));
+  }
+
+  updateRole(role: RoleMaster): Observable<RoleMaster> {
+    this.rolesMaster.update(list => list.map(r => r.id === role.id ? role : r));
+    this.sync('roles', this.rolesMaster());
+    this.logAction('st-1', 'Updated Role', 'User Management', `Updated permissions matrix for role: ${role.name}`);
+    return of(role).pipe(delay(100));
+  }
+
+  deleteRole(id: string): Observable<boolean> {
+    const role = this.rolesMaster().find(r => r.id === id);
+    if (!role) return throwError(() => new Error('Role not found'));
+    
+    this.rolesMaster.update(list => list.filter(r => r.id !== id));
+    this.sync('roles', this.rolesMaster());
+    this.logAction('st-1', 'Deleted Role', 'User Management', `Deleted user role configuration: ${role.name}`);
+    return of(true).pipe(delay(100));
+  }
+
+  getModules(): Observable<ModuleMaster[]> {
+    return of(this.modulesMaster()).pipe(delay(100));
+  }
+
+  addModule(mod: Omit<ModuleMaster, 'id'>): Observable<ModuleMaster> {
+    const newMod: ModuleMaster = { ...mod, id: `mod-${Date.now()}` };
+    this.modulesMaster.update(list => [...list, newMod]);
+    this.sync('modules', this.modulesMaster());
+    this.logAction('st-1', 'Created Module', 'User Management', `Created new platform module: ${mod.name}`);
+    return of(newMod).pipe(delay(100));
+  }
+
+  updateModule(mod: ModuleMaster): Observable<ModuleMaster> {
+    this.modulesMaster.update(list => list.map(m => m.id === mod.id ? mod : m));
+    this.sync('modules', this.modulesMaster());
+    this.logAction('st-1', 'Updated Module', 'User Management', `Updated platform module details: ${mod.name}`);
+    return of(mod).pipe(delay(100));
+  }
+
+  deleteModule(id: string): Observable<boolean> {
+    const mod = this.modulesMaster().find(m => m.id === id);
+    if (!mod) return throwError(() => new Error('Module not found'));
+    
+    this.modulesMaster.update(list => list.filter(m => m.id !== id));
+    this.sync('modules', this.modulesMaster());
+    this.logAction('st-1', 'Deleted Module', 'User Management', `Deleted platform module: ${mod.name}`);
+    return of(true).pipe(delay(100));
+  }
+
+  getPermissions(): Observable<PermissionMaster[]> {
+    return of(this.permissionsMaster()).pipe(delay(100));
+  }
+
+  addPermission(perm: Omit<PermissionMaster, 'id'>): Observable<PermissionMaster> {
+    const newPerm: PermissionMaster = { ...perm, id: `perm-${Date.now()}` };
+    this.permissionsMaster.update(list => [...list, newPerm]);
+    this.sync('permissions', this.permissionsMaster());
+    this.logAction('st-1', 'Created Permission', 'User Management', `Created new system permission: ${perm.name}`);
+    return of(newPerm).pipe(delay(100));
+  }
+
+  updatePermission(perm: PermissionMaster): Observable<PermissionMaster> {
+    this.permissionsMaster.update(list => list.map(p => p.id === perm.id ? perm : p));
+    this.sync('permissions', this.permissionsMaster());
+    this.logAction('st-1', 'Updated Permission', 'User Management', `Updated system permission details: ${perm.name}`);
+    return of(perm).pipe(delay(100));
+  }
+
+  deletePermission(id: string): Observable<boolean> {
+    const perm = this.permissionsMaster().find(p => p.id === id);
+    if (!perm) return throwError(() => new Error('Permission not found'));
+    
+    this.permissionsMaster.update(list => list.filter(p => p.id !== id));
+    this.sync('permissions', this.permissionsMaster());
+    this.logAction('st-1', 'Deleted Permission', 'User Management', `Deleted system permission: ${perm.name}`);
+    return of(true).pipe(delay(100));
+  }
+
+  // --- Transactional Logs ---
+
+  getLogs(): Observable<TransactionalLog[]> {
+    return of(this.transactionalLogs()).pipe(delay(100));
+  }
+
+  logAction(userId: string, action: string, module: string, details?: string): void {
+    const user = this.staffList().find(s => s.id === userId) || this.staffList()[0];
+    const newLog: TransactionalLog = {
+      id: `log-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      userId: user?.id || 'st-1',
+      userEmail: user?.email || 'admin@alaya.com',
+      userName: user?.name || 'Administrator Alaya',
+      action,
+      module,
+      timestamp: Date.now(),
+      details
+    };
+    this.transactionalLogs.update(list => [newLog, ...list]);
+    this.sync('logs', this.transactionalLogs());
   }
 }

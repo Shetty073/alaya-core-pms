@@ -6,7 +6,7 @@ import { PropertiesComponent } from './features/admin/properties/properties.comp
 import { EntitiesComponent } from './features/admin/entities/entities.component';
 import { KotComponent } from './features/admin/kot/kot.component';
 import { InventoryComponent } from './features/admin/inventory/inventory.component';
-import { StaffComponent } from './features/admin/staff/staff.component';
+import { UserManagementComponent } from './features/admin/user-management/user-management.component';
 import { HousekeepingComponent } from './features/admin/housekeeping/housekeeping.component';
 import { FinanceComponent } from './features/admin/finance/finance.component';
 import { StorefrontComponent } from './features/storefront/storefront.component';
@@ -69,8 +69,8 @@ export const routes: Routes = [
         data: { roles: ['admin', 'chef'] }
       },
       { 
-        path: 'staff', 
-        component: StaffComponent,
+        path: 'user-management', 
+        component: UserManagementComponent,
         canActivate: [authGuard],
         data: { roles: ['admin'] }
       },

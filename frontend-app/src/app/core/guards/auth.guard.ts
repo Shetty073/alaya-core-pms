@@ -13,7 +13,7 @@ export const authGuard: CanActivateFn = (route, state) => {
   }
 
   // Retrieve allowed roles for the route
-  const expectedRoles = route.data['roles'] as Array<'admin' | 'receptionist' | 'chef' | 'housekeeper' | 'driver' | 'guest' | 'captain' | 'biller'>;
+  const expectedRoles = route.data['roles'] as string[];
 
   // If no specific roles are defined, allow access
   if (!expectedRoles || expectedRoles.length === 0) {
