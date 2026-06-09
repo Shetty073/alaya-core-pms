@@ -47,12 +47,13 @@ This repository is organized as a monorepo containing both the frontend and back
 - **Secured Endpoint (`GET /api/test`)**: Uses JAX-RS Filters to inspect Bearer tokens and return protected user principal metadata.
 
 ### Configuration
+
 Update the PostgreSQL datasource details in [application.properties](backend-app/src/main/resources/application.properties):
 ```properties
 quarkus.datasource.db-kind=postgresql
-quarkus.datasource.username=postgres
-quarkus.datasource.password=postgres
-quarkus.datasource.jdbc.url=jdbc:postgresql://localhost:5432/postgres
+quarkus.datasource.username=${DB_USERNAME:postgres}
+quarkus.datasource.password=${DB_PASSWORD:postgres}
+quarkus.datasource.jdbc.url=${DB_JDBC_URL:jdbc:postgresql://localhost:5432/postgres}
 ```
 
 ### Getting Started
