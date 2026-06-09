@@ -36,6 +36,8 @@ export interface KOTOrder {
   items: KOTItem[];
   status: 'pending' | 'preparing' | 'ready' | 'served';
   timestamp: number;
+  billingStatus?: 'pending' | 'billed' | 'charged_to_room';
+  deliveryTime?: string;
 }
 
 export interface InventoryItem {
@@ -53,7 +55,7 @@ export interface Staff {
   id: string;
   name: string;
   email: string;
-  role: 'admin' | 'receptionist' | 'chef' | 'housekeeper' | 'driver' | 'guest';
+  role: 'admin' | 'receptionist' | 'chef' | 'housekeeper' | 'driver' | 'guest' | 'captain' | 'biller';
   accessModules: string[];
 }
 
@@ -83,6 +85,10 @@ export interface Invoice {
   total: number;
   status: 'unpaid' | 'paid';
   date: number;
+  idProofs?: string[];
+  prepayment?: number;
+  checkedInAt?: number;
+  checkedOutAt?: number;
 }
 
 export interface FinancialRecord {
@@ -206,7 +212,10 @@ export class MockDbService {
       { id: 'st-1', name: 'Administrator Alaya', email: 'admin@alaya.com', role: 'admin', accessModules: ['dashboard', 'properties', 'entities', 'kot', 'inventory', 'staff', 'housekeeping', 'finance'] },
       { id: 'st-2', name: 'Chef Mario', email: 'chef@alaya.com', role: 'chef', accessModules: ['dashboard', 'kot', 'inventory'] },
       { id: 'st-3', name: 'Sarah Clean', email: 'housekeeper@alaya.com', role: 'housekeeper', accessModules: ['housekeeping'] },
-      { id: 'st-4', name: 'John Guest', email: 'guest@alaya.com', role: 'guest', accessModules: [] }
+      { id: 'st-4', name: 'John Guest', email: 'guest@alaya.com', role: 'guest', accessModules: [] },
+      { id: 'st-5', name: 'Front Desk Fiona', email: 'receptionist@alaya.com', role: 'receptionist', accessModules: ['dashboard', 'entities', 'housekeeping', 'check-in-out'] },
+      { id: 'st-6', name: 'Captain Jack', email: 'captain@alaya.com', role: 'captain', accessModules: ['kot'] },
+      { id: 'st-7', name: 'Biller Bill', email: 'biller@alaya.com', role: 'biller', accessModules: ['restaurant-billing', 'kot'] }
     ];
 
     const initialHousekeeping: HousekeepingTask[] = [
@@ -340,7 +349,8 @@ export class MockDbService {
     const newOrder: KOTOrder = {
       ...order,
       id: `kot-${Math.floor(1000 + Math.random() * 9000)}`,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      billingStatus: 'pending'
     };
     this.kotOrders.update(k => [...k, newOrder]);
     this.sync('kotOrders', this.kotOrders());
@@ -551,5 +561,215 @@ export class MockDbService {
     this.financialRecords.update(recs => [...recs, newRecord]);
     this.sync('finance', this.financialRecords());
     return of(newRecord).pipe(delay(100));
+  }
+
+  // --- Guest Registry / Check-In/Out Helpers ---
+
+  getCheckedInGuests(): Observable<Invoice[]> {
+    return of(this.invoices().filter(inv => inv.status === 'unpaid' && inv.entityId && this.entities().some(e => e.id === inv.entityId && e.type === 'room'))).pipe(delay(100));
+  }
+
+  checkInGuest(data: { name: string, email: string, roomId: string, idProofs: string[], prepayment: number, checkInDays: number }): Observable<Invoice> {
+    const room = this.entities().find(e => e.id === data.roomId);
+    if (!room) return throwError(() => new Error('Room not found'));
+    
+    const roomCost = room.price * data.checkInDays;
+    const items: InvoiceItem[] = [
+      { description: `Room Booking (${data.checkInDays} nights @ $${room.price}/night)`, amount: roomCost }
+    ];
+    if (data.prepayment > 0) {
+      items.push({ description: 'Advance Pre-payment Credit', amount: -data.prepayment });
+    }
+    
+    const invoiceTotal = roomCost - data.prepayment;
+    const newInvoice: Invoice = {
+      id: `inv-${Date.now()}`,
+      guestName: data.name,
+      guestEmail: data.email,
+      entityId: data.roomId,
+      entityName: room.name,
+      items,
+      total: invoiceTotal,
+      status: 'unpaid',
+      date: Date.now(),
+      idProofs: data.idProofs,
+      prepayment: data.prepayment,
+      checkedInAt: Date.now()
+    };
+
+    // Update room status to occupied
+    this.entities.update(list => list.map(e => e.id === data.roomId ? { ...e, status: 'occupied' as const } : e));
+    this.invoices.update(list => [...list, newInvoice]);
+
+    // Log prepayment revenue
+    if (data.prepayment > 0) {
+      this.addFinancialRecord({
+        type: 'revenue',
+        category: 'Room Bookings',
+        amount: data.prepayment,
+        description: `Pre-payment from Guest ${data.name} for Room ${room.name}`
+      }).subscribe();
+    }
+    
+    this.syncAll();
+    return of(newInvoice).pipe(delay(150));
+  }
+
+  chargeOrderToRoom(orderId: string, invoiceId: string): Observable<boolean> {
+    const order = this.kotOrders().find(o => o.id === orderId);
+    if (!order) return throwError(() => new Error('Order not found'));
+    
+    const mockPrices: Record<string, number> = {
+      'Lobster Thermidor': 28,
+      'Butter Chicken Grand': 18,
+      'Garlic Butter Naan': 4,
+      'Margherita Pizza': 14,
+      'Caesar Salad': 10,
+      'Chardonnay Wine Glass': 12,
+      'Craft IPA Beer Bottle': 8,
+      'Fresh Watermelon Juice': 6,
+      'Mango Lassi Premium': 5,
+      'Chocolate Lava Cake': 9,
+      'Tiramisu Classical': 10
+    };
+
+    const orderTotal = order.items.reduce((sum, item) => sum + (item.qty * (mockPrices[item.name] || 15)), 0);
+
+    let updated = false;
+    this.invoices.update(list => list.map(inv => {
+      if (inv.id === invoiceId) {
+        const updatedItems = [
+          ...inv.items,
+          { description: `Restaurant Order #${orderId} - Charged to Suite`, amount: orderTotal }
+        ];
+        updated = true;
+        return {
+          ...inv,
+          items: updatedItems,
+          total: inv.total + orderTotal
+        };
+      }
+      return inv;
+    }));
+
+    if (updated) {
+      this.kotOrders.update(list => list.map(o => o.id === orderId ? { ...o, billingStatus: 'charged_to_room' as const } : o));
+      this.syncAll();
+      return of(true).pipe(delay(100));
+    } else {
+      return throwError(() => new Error('Room Invoice not found'));
+    }
+  }
+
+  addInvoiceItem(invoiceId: string, item: { description: string, amount: number }): Observable<Invoice> {
+    let updated: Invoice | null = null;
+    this.invoices.update(list => list.map(inv => {
+      if (inv.id === invoiceId) {
+        updated = {
+          ...inv,
+          items: [...inv.items, item],
+          total: inv.total + item.amount
+        };
+        return updated;
+      }
+      return inv;
+    }));
+    if (updated) {
+      this.syncAll();
+      return of(updated as Invoice).pipe(delay(100));
+    } else {
+      return throwError(() => new Error('Invoice not found'));
+    }
+  }
+
+  checkOutGuest(invoiceId: string): Observable<Invoice> {
+    const invoice = this.invoices().find(i => i.id === invoiceId);
+    if (!invoice) return throwError(() => new Error('Invoice not found'));
+
+    let updated: Invoice | null = null;
+    this.invoices.update(list => list.map(inv => {
+      if (inv.id === invoiceId) {
+        updated = { ...inv, status: 'paid' as const, checkedOutAt: Date.now() };
+        return updated;
+      }
+      return inv;
+    }));
+
+    // Flip room status to dirty
+    if (invoice.entityId) {
+      this.entities.update(list => list.map(e => e.id === invoice.entityId ? { ...e, status: 'dirty' as const } : e));
+      this.syncHousekeepingStatus(invoice.entityId, 'dirty');
+    }
+
+    // Log the remaining balance as revenue
+    const remainingRevenue = invoice.total;
+    if (remainingRevenue > 0) {
+      this.addFinancialRecord({
+        type: 'revenue',
+        category: 'Room Bookings',
+        amount: remainingRevenue,
+        description: `Check-out settle for Invoice ${invoice.id} (${invoice.guestName})`
+      }).subscribe();
+    }
+
+    this.syncAll();
+    return of(updated as unknown as Invoice).pipe(delay(150));
+  }
+
+  // --- Table Master Management ---
+
+  addTable(table: { name: string, subtype: string, propertyId: string }): Observable<Entity> {
+    const newTable: Entity = {
+      id: `ent-t-${Date.now()}`,
+      propertyId: table.propertyId,
+      name: table.name,
+      type: 'table',
+      subtype: table.subtype,
+      price: 0,
+      status: 'available'
+    };
+    this.entities.update(list => [...list, newTable]);
+    this.sync('entities', this.entities());
+    return of(newTable).pipe(delay(100));
+  }
+
+  deleteTable(id: string): Observable<boolean> {
+    const table = this.entities().find(e => e.id === id && e.type === 'table');
+    if (!table) return throwError(() => new Error('Table not found'));
+    
+    this.entities.update(list => list.filter(e => e.id !== id));
+    this.sync('entities', this.entities());
+    return of(true).pipe(delay(100));
+  }
+
+  settleKOTDirect(orderId: string): Observable<boolean> {
+    const order = this.kotOrders().find(o => o.id === orderId);
+    if (!order) return throwError(() => new Error('Order not found'));
+    
+    this.kotOrders.update(list => list.map(o => o.id === orderId ? { ...o, status: 'served' as const, billingStatus: 'billed' as const } : o));
+    
+    const mockPrices: Record<string, number> = {
+      'Lobster Thermidor': 28,
+      'Butter Chicken Grand': 18,
+      'Garlic Butter Naan': 4,
+      'Margherita Pizza': 14,
+      'Caesar Salad': 10,
+      'Chardonnay Wine Glass': 12,
+      'Craft IPA Beer Bottle': 8,
+      'Fresh Watermelon Juice': 6,
+      'Mango Lassi Premium': 5,
+      'Chocolate Lava Cake': 9,
+      'Tiramisu Classical': 10
+    };
+    const orderTotal = order.items.reduce((sum, item) => sum + (item.qty * (mockPrices[item.name] || 15)), 0);
+    this.addFinancialRecord({
+      type: 'revenue',
+      category: 'KOT Restaurant',
+      amount: orderTotal,
+      description: `Direct Settle KOT #${orderId} at ${order.entityName}`
+    }).subscribe();
+    
+    this.syncAll();
+    return of(true).pipe(delay(100));
   }
 }

@@ -59,6 +59,9 @@ import { AuthService } from '../../core/services/auth.service';
             </div>
             <div class="demo-buttons">
               <button type="button" class="btn btn-sm" (click)="fillDemo('admin@alaya.com')">Admin / Owner</button>
+              <button type="button" class="btn btn-sm" (click)="fillDemo('receptionist@alaya.com')">Front Desk / Receptionist</button>
+              <button type="button" class="btn btn-sm" (click)="fillDemo('captain@alaya.com')">Captain / Waiter</button>
+              <button type="button" class="btn btn-sm" (click)="fillDemo('biller@alaya.com')">Biller / Manager</button>
               <button type="button" class="btn btn-sm" (click)="fillDemo('chef@alaya.com')">Chef / Kitchen</button>
               <button type="button" class="btn btn-sm" (click)="fillDemo('housekeeper@alaya.com')">Housekeeping</button>
               <button type="button" class="btn btn-sm" (click)="fillDemo('guest@alaya.com')">Guest Storefront</button>
@@ -219,8 +222,14 @@ export class LoginComponent {
           this.router.navigate(['/storefront']);
         } else if (user.role === 'chef') {
           this.router.navigate(['/admin/kot']);
+        } else if (user.role === 'captain') {
+          this.router.navigate(['/admin/kot']);
+        } else if (user.role === 'biller') {
+          this.router.navigate(['/admin/restaurant-billing']);
         } else if (user.role === 'housekeeper') {
           this.router.navigate(['/admin/housekeeping']);
+        } else if (user.role === 'receptionist') {
+          this.router.navigate(['/admin/check-in-out']);
         } else {
           this.router.navigate(['/admin']);
         }

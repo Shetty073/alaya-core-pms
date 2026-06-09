@@ -12,6 +12,8 @@ import { FinanceComponent } from './features/admin/finance/finance.component';
 import { StorefrontComponent } from './features/storefront/storefront.component';
 import { PublicLandingComponent } from './features/public-landing/public-landing.component';
 import { PublicDetailsComponent } from './features/public-details/public-details.component';
+import { CheckInOutComponent } from './features/admin/check-in-out/check-in-out.component';
+import { RestaurantBillingComponent } from './features/admin/restaurant-billing/restaurant-billing.component';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
@@ -31,6 +33,18 @@ export const routes: Routes = [
         data: { roles: ['admin', 'receptionist'] }
       },
       { 
+        path: 'check-in-out', 
+        component: CheckInOutComponent,
+        canActivate: [authGuard],
+        data: { roles: ['admin', 'receptionist'] }
+      },
+      { 
+        path: 'restaurant-billing', 
+        component: RestaurantBillingComponent,
+        canActivate: [authGuard],
+        data: { roles: ['admin', 'biller'] }
+      },
+      { 
         path: 'properties', 
         component: PropertiesComponent,
         canActivate: [authGuard],
@@ -46,7 +60,7 @@ export const routes: Routes = [
         path: 'kot', 
         component: KotComponent,
         canActivate: [authGuard],
-        data: { roles: ['admin', 'chef'] }
+        data: { roles: ['admin', 'chef', 'captain', 'biller'] }
       },
       { 
         path: 'inventory', 

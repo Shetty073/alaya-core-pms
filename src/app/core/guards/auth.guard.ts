@@ -13,7 +13,7 @@ export const authGuard: CanActivateFn = (route, state) => {
   }
 
   // Retrieve allowed roles for the route
-  const expectedRoles = route.data['roles'] as Array<'admin' | 'receptionist' | 'chef' | 'housekeeper' | 'driver' | 'guest'>;
+  const expectedRoles = route.data['roles'] as Array<'admin' | 'receptionist' | 'chef' | 'housekeeper' | 'driver' | 'guest' | 'captain' | 'biller'>;
 
   // If no specific roles are defined, allow access
   if (!expectedRoles || expectedRoles.length === 0) {
@@ -31,8 +31,14 @@ export const authGuard: CanActivateFn = (route, state) => {
     router.navigate(['/storefront']);
   } else if (userRole === 'chef') {
     router.navigate(['/admin/kot']);
+  } else if (userRole === 'captain') {
+    router.navigate(['/admin/kot']);
+  } else if (userRole === 'biller') {
+    router.navigate(['/admin/restaurant-billing']);
   } else if (userRole === 'housekeeper') {
     router.navigate(['/admin/housekeeping']);
+  } else if (userRole === 'receptionist') {
+    router.navigate(['/admin/check-in-out']);
   } else {
     router.navigate(['/admin']);
   }

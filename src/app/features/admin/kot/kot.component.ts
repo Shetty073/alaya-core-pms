@@ -1,6 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { MockDbService, KOTOrder, KOTItem, Entity, Property } from '../../../core/services/mock-db.service';
 import { AuthService } from '../../../core/services/auth.service';
 
@@ -68,18 +69,47 @@ interface MenuItem {
                 <h3>Current Order</h3>
               </div>
               <div class="card-body">
-                <!-- Select Table / Room -->
+                <!-- Destination Selection (Segregated) -->
                 <div class="form-group">
-                  <label class="form-label">Dining Table / Guest Room</label>
+                  <label class="form-label" style="margin-bottom: 6px;">Location Mode</label>
+                  <div class="d-flex gap-2 mb-2">
+                    <button type="button" class="btn btn-sm flex-1" 
+                            [class.btn-primary]="orderMode === 'table'" 
+                            [class.btn-secondary]="orderMode !== 'table'"
+                            (click)="setOrderMode('table')">
+                      🍽️ Dine-In Table
+                    </button>
+                    <button type="button" class="btn btn-sm flex-1" 
+                            [class.btn-primary]="orderMode === 'room'" 
+                            [class.btn-secondary]="orderMode !== 'room'"
+                            (click)="setOrderMode('room')">
+                      🛏️ Room / Suite
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Select Dining Table -->
+                <div class="form-group" *ngIf="orderMode === 'table'">
+                  <label class="form-label">Dining Table</label>
                   <select class="form-control form-select" [(ngModel)]="orderEntityId">
-                    <option value="" disabled selected>Select Target Location</option>
-                    <optgroup label="Restaurant Tables">
-                      <option *ngFor="let t of tables()" [value]="t.id">{{ t.name }} ({{ t.subtype }})</option>
-                    </optgroup>
-                    <optgroup label="Guest Rooms">
-                      <option *ngFor="let r of rooms()" [value]="r.id">{{ r.name }} ({{ r.subtype }})</option>
-                    </optgroup>
+                    <option value="" disabled selected>Select Dining Table</option>
+                    <option *ngFor="let t of tables()" [value]="t.id">{{ t.name }} ({{ t.subtype }})</option>
                   </select>
+                </div>
+
+                <!-- Select Guest Room -->
+                <div class="form-group" *ngIf="orderMode === 'room'">
+                  <label class="form-label">Guest Room / Suite</label>
+                  <select class="form-control form-select" [(ngModel)]="orderEntityId">
+                    <option value="" disabled selected>Select Guest Suite</option>
+                    <option *ngFor="let r of rooms()" [value]="r.id">{{ r.name }} ({{ r.subtype }})</option>
+                  </select>
+                </div>
+
+                <!-- Delivery Time (Optional) -->
+                <div class="form-group mt-2" *ngIf="orderMode === 'room' && orderEntityId">
+                  <label class="form-label">In-Room Delivery Time</label>
+                  <input type="datetime-local" class="form-control" [(ngModel)]="deliveryTime" />
                 </div>
 
                 <!-- Cart Items List -->
@@ -138,6 +168,9 @@ interface MenuItem {
                 </div>
                 <div class="ticket-body">
                   <h4>Destination: {{ order.entityName }}</h4>
+                  <div class="delivery-time mb-2" *ngIf="order.deliveryTime" style="font-size: 11px; font-weight: 600; color: var(--warning-color);">
+                    🕒 Deliver at: {{ order.deliveryTime | date:'short' }}
+                  </div>
                   <ul class="ticket-items">
                     <li *ngFor="let item of order.items">
                       <span class="qty">{{ item.qty }}x</span> {{ item.name }}
@@ -168,6 +201,9 @@ interface MenuItem {
                 </div>
                 <div class="ticket-body">
                   <h4>Destination: {{ order.entityName }}</h4>
+                  <div class="delivery-time mb-2" *ngIf="order.deliveryTime" style="font-size: 11px; font-weight: 600; color: var(--warning-color);">
+                    🕒 Deliver at: {{ order.deliveryTime | date:'short' }}
+                  </div>
                   <ul class="ticket-items">
                     <li *ngFor="let item of order.items">
                       <span class="qty">{{ item.qty }}x</span> {{ item.name }}
@@ -198,6 +234,9 @@ interface MenuItem {
                 </div>
                 <div class="ticket-body">
                   <h4>Destination: {{ order.entityName }}</h4>
+                  <div class="delivery-time mb-2" *ngIf="order.deliveryTime" style="font-size: 11px; font-weight: 600; color: var(--warning-color);">
+                    🕒 Deliver at: {{ order.deliveryTime | date:'short' }}
+                  </div>
                   <ul class="ticket-items">
                     <li *ngFor="let item of order.items">
                       <span class="qty">{{ item.qty }}x</span> {{ item.name }}
@@ -479,12 +518,16 @@ export class KotComponent implements OnInit {
   userRole = this.authService.currentRole;
   activeView = signal<'kitchen' | 'waiter'>('kitchen');
 
+  private route = inject(ActivatedRoute);
+
   // Waiter view states
   properties = signal<Property[]>([]);
   entities = signal<Entity[]>([]);
   selectedCategory = signal<string>('all');
   
+  orderMode: 'table' | 'room' = 'table';
   orderEntityId = '';
+  deliveryTime = this.getLocalDateString();
   cart = signal<Array<KOTItem & { price: number }>>([]);
 
   // Kitchen view states
@@ -512,12 +555,31 @@ export class KotComponent implements OnInit {
     } else {
       this.activeView.set('waiter');
     }
+
+    // Check query params for roomId preselection
+    this.route.queryParams.subscribe(params => {
+      if (params['roomId']) {
+        this.orderMode = 'room';
+        this.orderEntityId = params['roomId'];
+      }
+    });
   }
 
   loadData() {
     this.dbService.getProperties().subscribe(list => this.properties.set(list));
     this.dbService.getEntities().subscribe(list => this.entities.set(list));
     this.dbService.getKOTOrders().subscribe(list => this.kotOrders.set(list));
+  }
+
+  setOrderMode(mode: 'table' | 'room') {
+    this.orderMode = mode;
+    this.orderEntityId = '';
+    this.deliveryTime = this.getLocalDateString();
+  }
+
+  getLocalDateString(): string {
+    const tzoffset = (new Date()).getTimezoneOffset() * 60000;
+    return (new Date(Date.now() - tzoffset)).toISOString().slice(0, 16);
   }
 
   setView(view: 'kitchen' | 'waiter') {
@@ -540,6 +602,11 @@ export class KotComponent implements OnInit {
 
   rooms(): Entity[] {
     return this.entities().filter(e => e.type === 'room');
+  }
+
+  isRoomSelected(): boolean {
+    const asset = this.entities().find(e => e.id === this.orderEntityId);
+    return asset ? asset.type === 'room' : false;
   }
 
   addToCart(item: MenuItem) {
@@ -587,12 +654,14 @@ export class KotComponent implements OnInit {
       entityId: this.orderEntityId,
       entityName,
       items: this.cart().map(c => ({ name: c.name, qty: c.qty, notes: c.notes || undefined })),
-      status: 'pending' as const
+      status: 'pending' as const,
+      deliveryTime: this.deliveryTime || undefined
     };
 
     this.dbService.createKOTOrder(orderData).subscribe(() => {
       this.cart.set([]);
       this.orderEntityId = '';
+      this.deliveryTime = this.getLocalDateString();
       this.loadData();
       alert('Order sent successfully to Kitchen Display!');
       this.setView('kitchen'); // Switch to monitor it

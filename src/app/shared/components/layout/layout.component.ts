@@ -419,11 +419,16 @@ export class LayoutComponent {
   private housekeepingIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`;
   private financeIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>`;
 
+  private checkInOutIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><polyline points="16 11 18 13 22 9"></polyline></svg>`;
+  private billingIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="12" y1="4" x2="12" y2="20"></line><line x1="2" y1="12" x2="22" y2="12"></line></svg>`;
+
   navItems: NavItem[] = [
     { label: 'Dashboard', route: '/admin/dashboard', icon: this.dashboardIcon, roles: ['admin', 'receptionist'] },
+    { label: 'Guest Registry', route: '/admin/check-in-out', icon: this.checkInOutIcon, roles: ['admin', 'receptionist'] },
     { label: 'Properties', route: '/admin/properties', icon: this.propertiesIcon, roles: ['admin'] },
     { label: 'Entities', route: '/admin/entities', icon: this.entitiesIcon, roles: ['admin', 'receptionist'] },
-    { label: 'KOT Restaurant', route: '/admin/kot', icon: this.kotIcon, roles: ['admin', 'chef'] },
+    { label: 'KOT Restaurant', route: '/admin/kot', icon: this.kotIcon, roles: ['admin', 'chef', 'captain', 'biller'] },
+    { label: 'Restaurant Billing', route: '/admin/restaurant-billing', icon: this.billingIcon, roles: ['admin', 'biller'] },
     { label: 'Inventory', route: '/admin/inventory', icon: this.inventoryIcon, roles: ['admin', 'chef'] },
     { label: 'Staff Directory', route: '/admin/staff', icon: this.staffIcon, roles: ['admin'] },
     { label: 'Housekeeping', route: '/admin/housekeeping', icon: this.housekeepingIcon, roles: ['admin', 'housekeeper'] },

@@ -32,7 +32,7 @@ export class AuthService {
       switchMap(staff => {
         const matchedUser = staff.find(s => s.email === normalizedEmail);
         if (!matchedUser) {
-          return throwError(() => new Error('User not found. Try admin@alaya.com, chef@alaya.com, housekeeper@alaya.com, or guest@alaya.com'));
+          return throwError(() => new Error('User not found. Try admin@alaya.com, receptionist@alaya.com, captain@alaya.com, biller@alaya.com, chef@alaya.com, housekeeper@alaya.com, or guest@alaya.com'));
         }
 
         if (password.length < 4) {
