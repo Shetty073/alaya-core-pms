@@ -8,6 +8,7 @@ export interface Property {
   type: 'hotel' | 'resort' | 'restaurant' | 'other';
   location: string;
   description: string;
+  imageUrl?: string;
 }
 
 export interface Entity {
@@ -18,6 +19,7 @@ export interface Entity {
   subtype?: string; // e.g. "Deluxe", "Suite", "Sedan", "SUV"
   price: number;
   status: 'available' | 'occupied' | 'dirty' | 'maintenance';
+  imageUrl?: string;
 }
 
 export interface KOTItem {
@@ -118,18 +120,44 @@ export class MockDbService {
     };
 
     const initialProperties: Property[] = [
-      { id: 'prop-1', name: 'Alaya Grand Plaza', type: 'hotel', location: 'Goa, Beachfront', description: 'Premium 5-star beachfront resort' },
-      { id: 'prop-2', name: 'Alaya Bistro & Kitchen', type: 'restaurant', location: 'Goa, Beachfront', description: 'Oceanview dining and bar' },
-      { id: 'prop-3', name: 'Alaya Hills Retreat', type: 'resort', location: 'Manali, Valley View', description: 'Cozy luxury retreat in the mountains' }
+      { 
+        id: 'prop-1', 
+        name: 'Alaya Grand Plaza', 
+        type: 'hotel', 
+        location: 'Goa, Beachfront', 
+        description: 'Premium 5-star beachfront resort featuring world-class oceanfront views, serene day-spa centers, and luxury suites.',
+        imageUrl: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&auto=format&fit=crop&q=60'
+      },
+      { 
+        id: 'prop-2', 
+        name: 'Alaya Bistro & Kitchen', 
+        type: 'restaurant', 
+        location: 'Goa, Beachfront', 
+        description: 'Oceanview dining offering coastal delicacies, fresh seafood harvests, open wood-fire grills, and premium cocktails.',
+        imageUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&auto=format&fit=crop&q=60'
+      },
+      { 
+        id: 'prop-3', 
+        name: 'Alaya Hills Retreat', 
+        type: 'resort', 
+        location: 'Manali, Valley View', 
+        description: 'Luxury mountain resort with pine log chalets, hot mineral springs pools, and panoramas of snow-capped peaks.',
+        imageUrl: 'https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=600&auto=format&fit=crop&q=60'
+      }
     ];
 
     const initialEntities: Entity[] = [
       // Rooms at Grand Plaza
-      { id: 'ent-101', propertyId: 'prop-1', name: 'Room 101', type: 'room', subtype: 'Deluxe Suite', price: 150, status: 'available' },
-      { id: 'ent-102', propertyId: 'prop-1', name: 'Room 102', type: 'room', subtype: 'Deluxe Suite', price: 150, status: 'occupied' },
-      { id: 'ent-103', propertyId: 'prop-1', name: 'Room 103', type: 'room', subtype: 'Presidential', price: 300, status: 'dirty' },
-      { id: 'ent-104', propertyId: 'prop-1', name: 'Room 104', type: 'room', subtype: 'Standard Room', price: 90, status: 'maintenance' },
-      { id: 'ent-105', propertyId: 'prop-1', name: 'Room 105', type: 'room', subtype: 'Standard Room', price: 90, status: 'available' },
+      { id: 'ent-101', propertyId: 'prop-1', name: 'Room 101', type: 'room', subtype: 'Deluxe Suite', price: 150, status: 'available', imageUrl: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=500&auto=format&fit=crop&q=60' },
+      { id: 'ent-102', propertyId: 'prop-1', name: 'Room 102', type: 'room', subtype: 'Deluxe Suite', price: 150, status: 'occupied', imageUrl: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=500&auto=format&fit=crop&q=60' },
+      { id: 'ent-103', propertyId: 'prop-1', name: 'Room 103', type: 'room', subtype: 'Presidential Suite', price: 300, status: 'dirty', imageUrl: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=500&auto=format&fit=crop&q=60' },
+      { id: 'ent-104', propertyId: 'prop-1', name: 'Room 104', type: 'room', subtype: 'Standard Room', price: 90, status: 'maintenance', imageUrl: 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=500&auto=format&fit=crop&q=60' },
+      { id: 'ent-105', propertyId: 'prop-1', name: 'Room 105', type: 'room', subtype: 'Standard Room', price: 90, status: 'available', imageUrl: 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=500&auto=format&fit=crop&q=60' },
+      
+      // Rooms at Alaya Hills Retreat
+      { id: 'ent-301', propertyId: 'prop-3', name: 'Cabin 301', type: 'room', subtype: 'Mountain Lodge Suite', price: 180, status: 'available', imageUrl: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=500&auto=format&fit=crop&q=60' },
+      { id: 'ent-302', propertyId: 'prop-3', name: 'Cabin 302', type: 'room', subtype: 'Alpine Chalet Deluxe', price: 240, status: 'available', imageUrl: 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=500&auto=format&fit=crop&q=60' },
+
       // Tables at Alaya Bistro
       { id: 'ent-t1', propertyId: 'prop-2', name: 'Table 1', type: 'table', subtype: '2-Seater', price: 0, status: 'available' },
       { id: 'ent-t2', propertyId: 'prop-2', name: 'Table 2', type: 'table', subtype: '4-Seater', price: 0, status: 'occupied' },

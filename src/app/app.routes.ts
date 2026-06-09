@@ -10,10 +10,13 @@ import { StaffComponent } from './features/admin/staff/staff.component';
 import { HousekeepingComponent } from './features/admin/housekeeping/housekeeping.component';
 import { FinanceComponent } from './features/admin/finance/finance.component';
 import { StorefrontComponent } from './features/storefront/storefront.component';
+import { PublicLandingComponent } from './features/public-landing/public-landing.component';
+import { PublicDetailsComponent } from './features/public-details/public-details.component';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: '', component: PublicLandingComponent },
+  { path: 'property/:id', component: PublicDetailsComponent },
   { path: 'login', component: LoginComponent },
   {
     path: 'admin',
@@ -77,5 +80,5 @@ export const routes: Routes = [
     canActivate: [authGuard],
     data: { roles: ['guest', 'admin', 'receptionist'] }
   },
-  { path: '**', redirectTo: 'login' }
+  { path: '**', redirectTo: '' }
 ];

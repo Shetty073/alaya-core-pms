@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
@@ -176,6 +176,7 @@ import { AuthService } from '../../core/services/auth.service';
 export class LoginComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   email = '';
   password = '';
@@ -200,7 +201,20 @@ export class LoginComponent {
     this.authService.login(this.email, this.password).subscribe({
       next: (user) => {
         this.loading.set(false);
-        // Redirect based on role
+
+        // Check if there is a redirect URL in query parameters
+        const params = this.route.snapshot.queryParams;
+        if (params['redirectUrl']) {
+          this.router.navigate([params['redirectUrl']], {
+            queryParams: {
+              propertyId: params['propertyId'] || null,
+              roomId: params['roomId'] || null
+            }
+          });
+          return;
+        }
+
+        // Default redirects based on role
         if (user.role === 'guest') {
           this.router.navigate(['/storefront']);
         } else if (user.role === 'chef') {

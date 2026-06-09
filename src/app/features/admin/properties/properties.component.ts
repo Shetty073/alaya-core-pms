@@ -28,6 +28,9 @@ import { MockDbService, Property } from '../../../core/services/mock-db.service'
               'badge-danger': prop.type === 'other'
             }">{{ prop.type | uppercase }}</span>
           </div>
+          <div class="property-image-container" *ngIf="prop.imageUrl">
+            <img [src]="prop.imageUrl" alt="Property building" class="property-image" />
+          </div>
           <div class="card-body">
             <h3 class="property-title">{{ prop.name }}</h3>
             <p class="property-location">
@@ -73,6 +76,10 @@ import { MockDbService, Property } from '../../../core/services/mock-db.service'
                 <label class="form-label" for="prop-desc">Description</label>
                 <textarea id="prop-desc" name="description" [(ngModel)]="newProp.description" class="form-control" rows="3" placeholder="Brief summary of the business..."></textarea>
               </div>
+              <div class="form-group">
+                <label class="form-label" for="prop-image">Building Image URL</label>
+                <input type="text" id="prop-image" name="imageUrl" [(ngModel)]="newProp.imageUrl" class="form-control" placeholder="e.g. https://images.unsplash.com/..." />
+              </div>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn" (click)="closeAddModal()">Cancel</button>
@@ -106,6 +113,20 @@ import { MockDbService, Property } from '../../../core/services/mock-db.service'
       padding: 16px 16px 0 16px;
       display: flex;
       justify-content: flex-start;
+    }
+    
+    .property-image-container {
+      width: 100%;
+      height: 130px;
+      overflow: hidden;
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .property-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
     
     .property-title {
@@ -162,7 +183,8 @@ export class PropertiesComponent implements OnInit {
     name: '',
     type: 'hotel',
     location: '',
-    description: ''
+    description: '',
+    imageUrl: ''
   };
 
   ngOnInit() {
@@ -198,7 +220,8 @@ export class PropertiesComponent implements OnInit {
       name: '',
       type: 'hotel',
       location: '',
-      description: ''
+      description: '',
+      imageUrl: ''
     };
   }
 }

@@ -1,7 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MockDbService, Entity, KOTOrder, Invoice, Property } from '../../core/services/mock-db.service';
 import { AuthService } from '../../core/services/auth.service';
 
@@ -456,6 +456,7 @@ export class StorefrontComponent implements OnInit {
   private dbService = inject(MockDbService);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   currentUser = this.authService.currentUser;
   activeSection = signal<'rooms' | 'dining' | 'services'>('rooms');
@@ -491,6 +492,22 @@ export class StorefrontComponent implements OnInit {
     this.loadData();
     this.initializeDates();
     this.restoreGuestBooking();
+
+    // Catch redirects from the public property details page
+    this.route.queryParams.subscribe(params => {
+      const propId = params['propertyId'];
+      const roomId = params['roomId'];
+      if (propId && roomId) {
+        setTimeout(() => {
+          const room = this.availableRooms().find(r => r.id === roomId);
+          if (room && room.status === 'available') {
+            this.bookRoom(room);
+            // Clear query parameters from URL
+            this.router.navigate([], { queryParams: {} });
+          }
+        }, 400);
+      }
+    });
   }
 
   private loadData() {

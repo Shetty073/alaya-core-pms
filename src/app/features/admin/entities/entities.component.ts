@@ -56,9 +56,14 @@ import { MockDbService, Entity, Property } from '../../../core/services/mock-db.
           <tbody>
             <tr *ngFor="let ent of filteredEntities()">
               <td>
-                <strong>{{ ent.name }}</strong>
-                <div style="font-size: 11px; color: var(--fg-muted);" *ngIf="ent.subtype">
-                  {{ ent.subtype }}
+                <div class="d-flex align-items-center gap-2">
+                  <img *ngIf="ent.type === 'room' && ent.imageUrl" [src]="ent.imageUrl" alt="Room thumbnail" class="room-thumb" />
+                  <div>
+                    <strong>{{ ent.name }}</strong>
+                    <div style="font-size: 11px; color: var(--fg-muted);" *ngIf="ent.subtype">
+                      {{ ent.subtype }}
+                    </div>
+                  </div>
                 </div>
               </td>
               <td>{{ getPropertyName(ent.propertyId) }}</td>
@@ -144,6 +149,10 @@ import { MockDbService, Entity, Property } from '../../../core/services/mock-db.
                   <option value="maintenance">Under Maintenance</option>
                 </select>
               </div>
+              <div class="form-group" *ngIf="newEnt.type === 'room'">
+                <label class="form-label" for="ent-image">Room Image URL</label>
+                <input type="text" id="ent-image" name="imageUrl" [(ngModel)]="newEnt.imageUrl" class="form-control" placeholder="e.g. https://images.unsplash.com/..." />
+              </div>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn" (click)="closeAddModal()">Cancel</button>
@@ -175,6 +184,14 @@ import { MockDbService, Entity, Property } from '../../../core/services/mock-db.
       flex: 1;
     }
     
+    .room-thumb {
+      width: 40px;
+      height: 40px;
+      object-fit: cover;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+    }
+    
     .action-buttons {
       display: flex;
       gap: 6px;
@@ -197,7 +214,8 @@ export class EntitiesComponent implements OnInit {
     type: 'room',
     subtype: '',
     price: 0,
-    status: 'available'
+    status: 'available',
+    imageUrl: ''
   };
 
   ngOnInit() {
@@ -264,7 +282,8 @@ export class EntitiesComponent implements OnInit {
       type: 'room',
       subtype: '',
       price: 0,
-      status: 'available'
+      status: 'available',
+      imageUrl: ''
     };
   }
 }
