@@ -1,41 +1,68 @@
-# Alaya Core PMS (Enterprise Property & Hospitality Management Frontend)
+# Alaya Core PMS (Property Management System)
 
-This project is the enterprise-grade frontend for the **Alaya Core PMS** Property Management System (ERP for properties, hotels, restaurants, and cabs). Built with **Angular** (Standalone Components) and styled with clean **Vanilla CSS** inspired by GitHub and Oracle PMS designs.
-
-## Core Features
-1. **Properties & Assets Console**: Register property branches and manage rooms, dining tables, and cabs.
-2. **KOT System**: Digital waiters' order ticket entry and live kitchen display Kanban boards.
-3. **Inventory Management**: Live stock levels, low-count warning highlights, and purchase order simulators.
-4. **Housekeeping Checklist**: Attendance sheets to delegate and track room cleanliness (dirty, cleaning, clean).
-5. **Staff Directory**: Role management (Owner, Receptionist, Chef, Attendant) and module permission checkers.
-6. **Finance Ledger**: Invoice generation, account settlements, and profit/loss transaction timelines.
-7. **Guest Storefront**: Date-based stay booking, in-room food menu orders, taxi transfers, and billing checkouts.
+Alaya Core PMS is an enterprise-grade ERP solution designed for hotels, resorts, restaurants, and other hospitality service entities.
 
 ---
 
-## Predefined Demo Logins
+## Repository Structure
 
-No complex authentication setup is needed. You can log in directly using the preset credentials (or click the quick-fill buttons on the login screen):
-
-- **Admin/Owner**: `admin@alaya.com` (Accesses all modules)
-- **Chef/Kitchen**: `chef@alaya.com` (Accesses KOT & Inventory)
-- **Housekeeper**: `housekeeper@alaya.com` (Accesses Housekeeping)
-- **Guest/Storefront**: `guest@alaya.com` (Accesses Storefront booking/dining)
-- *Password for all profiles:* `password123` (or anything matching)
+This repository is organized as a monorepo containing both the frontend and backend applications:
+* **[frontend-app/](frontend-app/)**: The standalone Angular frontend client featuring the Admin portals (Dashboard, Housekeeping boards, Guest Registry, Restaurant Billing) and the Guest Storefront portal.
+* **[backend-app/](backend-app/)**: The Quarkus Java REST API backend connecting to a PostgreSQL database for authentication and session token validation.
 
 ---
 
-## Local Development Server
+## 💻 Frontend Application (Angular)
 
-Run the development server locally:
-```bash
-npm run start
-```
-Navigate to `http://localhost:4200/` in your browser. All data modifications are preserved across refreshes via local storage mocks.
+### Key Features
+- **Guest Registry (Check-In/Out)**: Manual room check-ins with prepaid logs and simulated ID attachments. Aggregated invoice checkout settlement.
+- **KOT Restaurant System**: Segregated table/suite waiter ordering with specific delivery date-time selections and kitchen preparation Kanban monitoring.
+- **Restaurant Billing**: Direct payment settling or charging bills straight to hotel guest room tabs.
+- **Staff Directory, Housekeeping Board, Inventory PO Simulator, & Finance Ledgers**.
 
-## Production Compilations
-To compile a production build:
-```bash
-npm run build
+### Getting Started
+1. Navigate to the frontend directory:
+   ```bash
+   cd frontend-app
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Run the local development server:
+   ```bash
+   npm run start
+   ```
+4. Open your browser to `http://localhost:4200/`.
+
+*Note: You can log in using preset quick-fill buttons for **Receptionist, Captain, Biller, Admin, Chef, Housekeeper, or Guest**.*
+
+---
+
+## ☕ Backend Application (Quarkus REST API)
+
+### Key Features
+- **Register Endpoint (`POST /api/auth/register`)**: Inserts new user profiles.
+- **Login Endpoint (`POST /api/auth/login`)**: Validates credentials and generates database-backed session tokens.
+- **Secured Endpoint (`GET /api/test`)**: Uses JAX-RS Filters to inspect Bearer tokens and return protected user principal metadata.
+
+### Configuration
+Update the PostgreSQL datasource details in [application.properties](backend-app/src/main/resources/application.properties):
+```properties
+quarkus.datasource.db-kind=postgresql
+quarkus.datasource.username=postgres
+quarkus.datasource.password=postgres
+quarkus.datasource.jdbc.url=jdbc:postgresql://localhost:5432/postgres
 ```
-Build assets will be saved under the `dist/alaya-core-pms-frontend/` directory.
+
+### Getting Started
+1. Make sure a PostgreSQL database is running on port `5432`.
+2. Navigate to the backend directory:
+   ```bash
+   cd backend-app
+   ```
+3. Start the application in Quarkus Dev Mode (auto-recompiling):
+   ```bash
+   mvn quarkus:dev
+   ```
+4. Exposes JAX-RS REST endpoints on `http://localhost:8080/`.
