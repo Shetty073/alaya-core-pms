@@ -211,14 +211,18 @@ import { MockDbService, Staff, RoleMaster, ModuleMaster, PermissionMaster, Trans
                     <label class="form-label">Scanned ID Proofs</label>
                     <div class="proofs-edit-list mb-2">
                       <div class="edit-proof-item justify-between d-flex align-items-center" *ngFor="let proof of editStaffData.idProofs; let i = index">
-                        <span class="proof-filename">📄 {{ proof }}</span>
+                        <span class="proof-filename" style="display: inline-flex; align-items: center; gap: 4px;">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                          {{ proof }}
+                        </span>
                         <button type="button" class="btn btn-sm btn-danger py-1 px-2" (click)="removeEditProof(i)">Remove</button>
                       </div>
                     </div>
                     <div class="upload-zone p-2 border border-dashed rounded text-center">
                       <input type="file" id="edit-proof-upload" class="d-none" (change)="onEditProofUpload($event)" multiple />
-                      <label for="edit-proof-upload" class="clickable-label m-0 font-semibold text-primary cursor-pointer">
-                        📁 Click to upload simulated ID files
+                      <label for="edit-proof-upload" class="clickable-label m-0 font-semibold text-primary cursor-pointer" style="display: inline-flex; align-items: center; gap: 6px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                        Click to upload simulated ID files
                       </label>
                     </div>
                   </div>
@@ -344,8 +348,9 @@ import { MockDbService, Staff, RoleMaster, ModuleMaster, PermissionMaster, Trans
             </div>
           </div>
           
-          <div class="alert alert-info mt-3" *ngIf="!selectedRole()">
-            💡 Select an operational role from the <b>Operational Roles</b> list to configure its permissions matrix mapping.
+          <div class="alert alert-info mt-3" style="display: inline-flex; align-items: center; gap: 8px;" *ngIf="!selectedRole()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A7.5 7.5 0 0 0 3 8c0 1.3.5 2.6 1.5 3.5.8.8 1.3 1.5 1.5 2.5"></path><line x1="9" y1="18" x2="15" y2="18"></line><line x1="10" y1="22" x2="14" y2="22"></line></svg>
+            <span>Select an operational role from the <b>Operational Roles</b> list to configure its permissions matrix mapping.</span>
           </div>
         </div>
 
@@ -467,14 +472,18 @@ import { MockDbService, Staff, RoleMaster, ModuleMaster, PermissionMaster, Trans
                 <label class="form-label">Attach Scanned ID Proofs</label>
                 <div class="uploaded-previews mb-2" *ngIf="newUser.idProofs && newUser.idProofs.length > 0">
                   <div class="preview-item d-flex justify-between align-items-center" *ngFor="let proof of newUser.idProofs; let i = index">
-                    <span>📄 {{ proof }}</span>
+                    <span style="display: inline-flex; align-items: center; gap: 4px;">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                      {{ proof }}
+                    </span>
                     <button type="button" class="btn btn-sm btn-danger py-1" (click)="removeNewUserProof(i)">Remove</button>
                   </div>
                 </div>
                 <div class="upload-zone p-3 border border-dashed rounded text-center">
                   <input type="file" id="modal-proof-upload" class="d-none" (change)="onModalProofUpload($event)" multiple />
-                  <label for="modal-proof-upload" class="clickable-label m-0 font-semibold text-primary cursor-pointer">
-                    📁 Click to select file scans for ID proofs
+                  <label for="modal-proof-upload" class="clickable-label m-0 font-semibold text-primary cursor-pointer" style="display: inline-flex; align-items: center; gap: 6px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                    Click to select file scans for ID proofs
                   </label>
                 </div>
               </div>
