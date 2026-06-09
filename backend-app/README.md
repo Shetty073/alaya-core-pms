@@ -15,16 +15,21 @@ This is the Maven-based Quarkus Java application representing the backend of the
 
 ## Configuration
 
-The database connections are set in [application.properties](src/main/resources/application.properties):
+The database connections are configured in [application.properties](src/main/resources/application.properties) using MicroProfile expression configurations:
 ```properties
 quarkus.datasource.db-kind=postgresql
-quarkus.datasource.username=postgres
-quarkus.datasource.password=postgres
-quarkus.datasource.jdbc.url=jdbc:postgresql://localhost:5432/postgres
+quarkus.datasource.username=${DB_USERNAME:postgres}
+quarkus.datasource.password=${DB_PASSWORD:postgres}
+quarkus.datasource.jdbc.url=${DB_JDBC_URL:jdbc:postgresql://localhost:5432/postgres}
 
 # Automatically update PostgreSQL schema tables on startup
 quarkus.hibernate-orm.database.generation=update
 ```
+
+For production deployment, inject the following environment variables:
+- `DB_USERNAME`: Database login username
+- `DB_PASSWORD`: Database login password
+- `DB_JDBC_URL`: PostgreSQL JDBC url connection string
 
 Ensure a PostgreSQL instance is running on port `5432` with a database named `postgres` (or customize the connection URL).
 
