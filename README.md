@@ -99,3 +99,49 @@ docker compose up -d --scale backend=4 --scale frontend=3
 ```
 The gateway Nginx server is configured with upstream load balancers that resolve to the Docker network DNS dynamically, ensuring seamless round-robin traffic routing without downtime.
 
+---
+
+## 📸 Application Screenshots
+
+Here are the key portals and dashboards of the **Alaya Core PMS** platform:
+
+### 📊 Main Administration Dashboard
+![Administration Dashboard](screenshots/0.png)
+*Property metrics, occupancy rate status, active KOT orders, and quick action shortcuts*
+
+### 🛎️ Guest Registry (Check-In / Check-Out)
+![Guest Registry](screenshots/1.png)
+*Simulated guest ID scans, room bookings, and checkout ledger settlement*
+
+### 🏢 Properties Administration
+![Properties Administration](screenshots/2.png)
+*Manage multiple property branches including hotels, resorts, and restaurants*
+
+### 🏷️ Entities Management
+![Entities Management](screenshots/3.png)
+*Add and configure property assets (rooms, cabins, suites, restaurant tables)*
+
+### 🍽️ Kitchen Order Ticket (KOT) System
+![KOT Restaurant](screenshots/4.png)
+*Digital waiter ordering portal with table mapping and active order placement*
+
+### 💳 Restaurant Billing Queue
+![Restaurant Billing](screenshots/5.png)
+*Pending restaurant orders, POS transaction billing, and room-tab charging*
+
+### 📦 Inventory Management
+![Inventory Management](screenshots/6.png)
+*Stock management of items (food/beverages, room linens, cleaning supplies) with low-stock reorder indicators*
+
+### 🧹 Housekeeping Board
+![Housekeeping Board](screenshots/7.png)
+*Live room cleaning statuses, staff attendance, and room cleaner task checklists*
+
+### 🌐 Guest Storefront Portal
+![Guest Storefront](screenshots/8.png)
+*Self-service guest portal for room reservations, room service ordering, and hotel amenities bookings*
+
+
+
+
+
