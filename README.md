@@ -141,7 +141,8 @@ Here are the key portals and dashboards of the **Alaya Core PMS** platform:
 ![Guest Storefront](screenshots/8.png)
 *Self-service guest portal for room reservations, room service ordering, and hotel amenities bookings*
 
-
+### Getting Started
+[GNU AGPL v3](LICENSE)
 
 
 
